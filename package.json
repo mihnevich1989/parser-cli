@@ -1,0 +1,22 @@
+{
+  "type": "module",
+  "name": "parser-cli",
+  "version": "1.0.0",
+  "description": "parser for read xml data",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "parser",
+    "cli"
+  ],
+  "author": "mihnevich",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "chalk": "^5.2.0",
+    "dedent-js": "^1.0.1",
+    "fast-xml-parser": "^4.2.4"
+  }
+}
