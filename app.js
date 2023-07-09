@@ -13,7 +13,6 @@ const parserCLI = async (url) => {
     const parser = await XmlReader(sitemap);
     const archive = await DownloadArchive(parser);
     const unzipAndRead = await UnzipFile(archive);
-    console.log(archive);
   } catch (e) {
     console.log(
       dedent`
