@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { get } from 'https';
 import { getPath } from '../helpers/path.js';
 import * as stream from 'stream';
 import { promisify } from 'util';
@@ -61,21 +62,19 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
     urls.forEach((url, i) => {
       const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
       setTimeout(async function () {
-        await axios.get(`${replacedUrl}`, { validateStatus: false })
-          .then((res) => {
-            if (res.status !== 200) {
-              fails++;
-              console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.bgRed(res.status)}`);
-            } else {
-              console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.green(res.status)}`);
+        await get(`${replacedUrl}`, (res) => {
+          if (res.statusCode !== 200) {
+            fails++;
+            console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.bgRed(res.statusCode)}`);
+          } else {
+            console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.green(res.statusCode)}`);
+          }
+          setTimeout(function () {
+            if (i + 1 == countCheck) {
+              ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails, startTime);
             }
-          }).then(() => {
-            setTimeout(function () {
-              if (i + 1 == countCheck) {
-                ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails, startTime);
-              }
-            }, 5 * i);
-          });
+          }, 5 * i);
+        });
       }, 30 * i);
     });
   } catch (e) {
