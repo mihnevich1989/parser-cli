@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { get } from 'https';
+import https from 'https';
 import { getPath } from '../helpers/path.js';
 import * as stream from 'stream';
 import { promisify } from 'util';
@@ -62,7 +62,7 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
     urls.forEach((url, i) => {
       const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
       setTimeout(async function () {
-        await get(`${replacedUrl}`, (res) => {
+        https.request(`${replacedUrl}`, (res) => {
           if (res.statusCode !== 200) {
             fails++;
             console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.bgRed(res.statusCode)}`);
@@ -74,7 +74,7 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
               ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails, startTime);
             }
           }, 5 * i);
-        });
+        }).on('error', (e) => { console.error(`Ошибка ЗАПРОСА: ${e}`); }).end();
       }, 30 * i);
     });
   } catch (e) {
