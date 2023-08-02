@@ -5,9 +5,9 @@ import chalk from 'chalk';
 import { GetInfoAboutFile, UnzipFile } from './services/file-worker.js';
 
 
-const SERVER = process.argv[2]; //https://test.nuwber.com/
-const SITEMAP = process.argv[3]; // 'https://nuwber.com/sitemaps/doD2NmDRD2hk.xml'; // 'https://nuwber.com/sitemaps/doD2NmDRD2hk/persons-ak-1.xml.gz'
-const COUNT = process.argv[4] || 1; // 100
+const SERVER = process.argv[2];
+const SITEMAP = process.argv[3];
+const COUNT = process.argv[4] || 300;
 
 const parserCLI = async () => {
   try {

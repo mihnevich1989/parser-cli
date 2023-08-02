@@ -70,12 +70,13 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
             } else {
               console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.green(res.status)}`);
             }
+          }).then(() => {
+            setTimeout(function () {
+              if (i + 1 == countCheck) {
+                ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails);
+              }
+            }, 5 * i);
           });
-        setTimeout(function () {
-          if (i == countCheck - 1) {
-            ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails);
-          }
-        }, 5 * i);
       }, 30 * i);
     });
   } catch (e) {
