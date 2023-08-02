@@ -10,7 +10,6 @@ import chalk from 'chalk';
 import { ReportGenerator } from './report-generator.js';
 
 
-
 const GetSitemap = async (url) => {
   try {
     return new Promise(async (resolve, reject) => {
@@ -55,7 +54,7 @@ const DownloadArchive = async (fileUrl) => {
   }
 };
 
-const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fileSize, countCheck) => {
+const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fileSize, countCheck, startTime) => {
   try {
     let fails = 0;
 
@@ -73,7 +72,7 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
           }).then(() => {
             setTimeout(function () {
               if (i + 1 == countCheck) {
-                ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails);
+                ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails, startTime);
               }
             }, 5 * i);
           });
