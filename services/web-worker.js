@@ -74,7 +74,7 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
               ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails, startTime);
             }
           }, 5 * i);
-        }).on('error', (e) => { console.error(`Ошибка ЗАПРОСА: ${e}`); }).end();
+        }).on('error', (e) => { console.error(`Ошибка ЗАПРОСА: ${e.message}`); }).end();
       }, 30 * i);
     });
   } catch (e) {
