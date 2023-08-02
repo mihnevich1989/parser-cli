@@ -62,7 +62,7 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
     urls.forEach((url, i) => {
       const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
       setTimeout(async function () {
-        await axios.get(`${replacedUrl}`)
+        await axios.get(`${replacedUrl}`, { validateStatus: false })
           .then((res) => {
             if (res.status !== 200) {
               fails++;

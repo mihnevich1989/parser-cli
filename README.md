@@ -6,3 +6,10 @@ __npm run parser {{arg 1: domain/}} {{arg 2: sitemap link}} {{total checks}}__
 __npm run parser https://test.example.com/ https://example.com/sitemaps/yoursitemap.xml 100__
 # Пример запуска отдельного файла gz сайтмапы:
 __npm run parser https://test.example.com/ https://example.com/sitemaps/yoursitemapfile.xml.gz 100__
+
+-----
+# Установить как CLI: 
+__npm i -g sitemap-parser-cli-demo__
+
+# Команда для запуска: 
+__sitemap-checker {{arg 1: domain/}} {{arg 2: sitemap link}} {{total checks}}__
