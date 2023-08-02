@@ -1,17 +1,17 @@
 {
-  "name": "parser-sitemap-cli-demo",
-  "version": "1.0.0",
+  "name": "sitemap-parser-cli",
+  "version": "0.0.2",
   "description": "parser for read xml data aour projects",
-  "main": "app.js",
+  "main": "parser.js",
   "bin": {
-    "sitemap-checker": "app.js"
+    "sitemap-checker": "parser.js"
   },
   "engines": {
     "node": ">14"
   },
   "type": "module",
   "scripts": {
-    "start": "node app.js"
+    "parser": "node parser.js"
   },
   "keywords": [
     "parser sitemap",

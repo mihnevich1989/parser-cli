@@ -1,8 +1,8 @@
-# parser-sitemap-cli-demo
-# Install dependencies: 
-__npm i parser-sitemap-cli-demo__
-# Command for run: 
-__sitemap-checker {{arg 1: domain/}} {{arg 2: sitemap link}} {{total checks}}__
-# Example: 
-__sitemap-checker https://test.nuwber.com/ https://nuwber.com/sitemaps/doD2NmDRD2hk.xml 100__
-
+# Установить зависимости: 
+__npm i__
+# Команда для запуска: 
+__npm run parser {{arg 1: domain/}} {{arg 2: sitemap link}} {{total checks}}__
+# Пример запуска: 
+__npm run parser https://test.example.com/ https://example.com/sitemaps/yoursitemap.xml 100__
+# Пример запуска отдельного файла gz сайтмапы:
+__npm run parser https://test.example.com/ https://example.com/sitemaps/yoursitemapfile.xml.gz 100__
