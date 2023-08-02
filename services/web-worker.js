@@ -1,41 +1,91 @@
 import axios from 'axios';
+import { getPath } from '../helpers/path.js';
+import * as stream from 'stream';
+import { promisify } from 'util';
 import fs from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import dedent from 'dedent-js';
 import chalk from 'chalk';
+import { ReportGenerator } from './report-generator.js';
+
+
 
 const GetSitemap = async (url) => {
-  const response = await axios.get(url);
-  return response.data;
-};
-
-const DownloadArchive = async (urls) => {
   try {
-    return new Promise((resolve, reject) => {
-      if (!urls.length) reject('Ссылки не были получены');
-      let files = [];
-      urls.forEach(async url => {
-        const fileName = url.slice(url.lastIndexOf('/') + 1);
-        const writer = fs.createWriteStream(join(homedir(), fileName));
-        const response = await axios({
-          method: 'get',
-          url,
-          responseType: 'stream',
-        });
-        await response.data.pipe(writer);
-        files.push(fileName);
-        if (files.length == urls.length) resolve(files);
-      });
+    return new Promise(async (resolve, reject) => {
+      const response = await axios.get(url);
+      if (response.data.includes('Incapsula')) {
+        reject(new Error(dedent`
+        Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(403)}`));
+      } else {
+        if (url.includes('.xml.gz')) {
+          resolve();
+        }
+        resolve(response.data);
+      }
     });
   } catch (e) {
     console.log(
       dedent`
-            ${chalk.bgRed(' ОШИБКА ')} скачивания файла 
-            ${e}
+            ${chalk.bgRed(' ОШИБКА ')} получения контента sitemap 
+            ${e.message}
             `
     );
   }
 };
 
-export { GetSitemap, DownloadArchive };
+const DownloadArchive = async (fileUrl) => {
+  try {
+    return new Promise((resolve) => {
+      const pipeline = promisify(stream.pipeline);
+      const fileName = fileUrl.slice(fileUrl.lastIndexOf('/') + 1);
+      axios.get(fileUrl, { responseType: 'stream' })
+        .then(response => {
+          pipeline(response.data, fs.createWriteStream(join(homedir(), fileName)).on('finish', () => { resolve(fileName); }));
+        });
+    });
+  } catch (e) {
+    console.log(
+      dedent`
+            ${chalk.bgRed(' ОШИБКА ')} скачивания файла 
+            ${e.message}
+            `
+    );
+  }
+};
+
+const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fileSize, countCheck) => {
+  try {
+    let fails = 0;
+
+    urls.forEach((url, i) => {
+      const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
+      setTimeout(async function () {
+        await axios.get(`${replacedUrl}`)
+          .then((res) => {
+            if (res.status !== 200) {
+              fails++;
+              console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.bgRed(res.status)}`);
+            } else {
+              console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.green(res.status)}`);
+            }
+          });
+        setTimeout(function () {
+          if (i == countCheck - 1) {
+            ReportGenerator(unzipedFile, totalLinks, fileSize, countCheck, fails);
+          }
+        }, 5 * i);
+      }, 30 * i);
+    });
+  } catch (e) {
+    console.log(
+      dedent`
+            ${chalk.bgRed(' ОШИБКА ')} скачивания файла 
+            ${e.message}
+            `
+    );
+  }
+};
+
+export { GetSitemap, DownloadArchive, GetStatusCodeAndReport };

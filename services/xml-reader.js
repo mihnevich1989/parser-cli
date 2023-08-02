@@ -1,5 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
-import { getPath } from '../helpers/path.js';
+import fs from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 import chalk from 'chalk';
 import dedent from 'dedent-js';
 const Parser = new XMLParser();
@@ -7,15 +9,10 @@ const Parser = new XMLParser();
 const XmlReader = async (data) => {
   try {
     const parseToJson = await Parser.parse(data);
-    let URLs = [];
+    let url;
     if (parseToJson?.sitemapindex?.sitemap?.length) {
-      parseToJson.sitemapindex.sitemap.forEach((obj, i, arr) => {
-        /* if (i == 0) URLs.push(obj.loc);
-        if (i == (arr.length - 1) / 2) URLs.push(obj.loc);
-        if (i == arr.length - 1) URLs.push(obj.loc); */
-      });
-      URLs.push(parseToJson.sitemapindex.sitemap[Math.floor(Math.random() * parseToJson.sitemapindex.sitemap.length)].loc);
-      return URLs;
+      url = parseToJson.sitemapindex.sitemap[Math.floor(Math.random() * parseToJson.sitemapindex.sitemap.length)].loc;
+      return url;
     }
   } catch (e) {
     console.log(
@@ -28,5 +25,38 @@ const XmlReader = async (data) => {
   }
 };
 
+const CollectRandomUrls = async (fileName, countCheck) => {
+  try {
+    let urls = [];
+    return new Promise((resolve, reject) => {
+      fs.readFile(join(homedir(), fileName), 'utf8', async (err, data) => {
+        if (err) {
+          reject("\x1b[31mФайл не найден!\x1b[0m -", err.message);
+        }
+        if (data) {
+          const urlFromFile = await Parser.parse(data);
+          const totalLinks = urlFromFile.urlset.url.length;
+          if (countCheck > totalLinks) countCheck = totalLinks;
+          for (let i = 0; i < countCheck; i++) {
+            urls.push(urlFromFile.urlset.url[Math.floor(Math.random() * urlFromFile.urlset.url.length)].loc);
+            if (urls.length == countCheck) {
+              fs.unlinkSync(join(homedir(), fileName));
+              resolve({ urls, totalLinks, countCheck });
+            }
+          }
+        }
+      });
 
-export { XmlReader };
+    });
+  } catch (e) {
+    console.log(
+      dedent`
+            ${chalk.bgRed(' ОШИБКА ')}
+            CollectRandomUrls не удалось получить прочитать файл, 
+            ${e.message}
+            `
+    );
+  }
+};
+
+export { XmlReader, CollectRandomUrls };
