@@ -12,6 +12,9 @@ const COUNT = process.argv[4] || 300;
 
 const parserCLI = async () => {
   try {
+    if (!SITEMAP.includes('.xml')) {
+      throw new Error('Некорректная сайтмапа');
+    }
     const time = performance.now();
     let parser;
     const sitemap = await GetSitemap(SITEMAP);
