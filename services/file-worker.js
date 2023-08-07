@@ -7,7 +7,6 @@ import { join } from 'path';
 
 const UnzipFile = async (archivedFile) => {
   try {
-    console.log(archivedFile);
     return new Promise((resolve, reject) => {
       if (!fs.existsSync(join(homedir(), archivedFile))) {
         reject(new Error(`${archivedFile} отсутствует!`));
