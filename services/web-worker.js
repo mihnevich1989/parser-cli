@@ -9,21 +9,25 @@ import { join } from 'path';
 import dedent from 'dedent-js';
 import chalk from 'chalk';
 import { ReportGenerator } from './report-generator.js';
+import { log } from 'console';
 
 
 const GetSitemap = async (url) => {
   try {
+    /* const server = 'https://test.nuwber.com/' // удалить после того как сгенерируем сайтмапы Top Trending searches на проде
+    const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url); // удалить после того как сгенерируем сайтмапы Top Trending searches на проде */
+
     return new Promise(async (resolve, reject) => {
-      const response = await axios.get(url);
-      if (response.data.includes('Incapsula')) {
+      const response = await axios.get(url); // заменить на url
+      // const response = await axios.get(replacedUrl);
+      if (response?.data.includes('Incapsula')) {
         reject(new Error(dedent`
         Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(403)}`));
-      } else {
-        if (url.includes('.xml.gz')) {
-          resolve();
-        }
-        resolve(response.data);
       }
+      if (url.includes('.xml.gz')) {
+        resolve();
+      }
+      resolve(response.data);
     });
   } catch (e) {
     console.log(

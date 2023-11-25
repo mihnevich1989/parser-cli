@@ -2,6 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
+import { getPath } from '../helpers/path.js';
 import chalk from 'chalk';
 import dedent from 'dedent-js';
 const Parser = new XMLParser();
@@ -13,6 +14,8 @@ const XmlReader = async (data) => {
     if (parseToJson?.sitemapindex?.sitemap?.length) {
       url = parseToJson.sitemapindex.sitemap[Math.floor(Math.random() * parseToJson.sitemapindex.sitemap.length)].loc;
       return url;
+    } else {
+      return data;
     }
   } catch (e) {
     console.log(
@@ -52,11 +55,38 @@ const CollectRandomUrls = async (fileName, countCheck) => {
     console.log(
       dedent`
             ${chalk.bgRed(' ОШИБКА ')}
-            CollectRandomUrls не удалось получить прочитать файл, 
+            CollectRandomUrls не удалось прочитать файл, 
             ${e.message}
             `
     );
   }
 };
 
-export { XmlReader, CollectRandomUrls };
+const CollectRandomUrlsFromWebXML = async (xmlSitemap, countCheck) => {
+  try {
+    
+    let urls = [];
+    return new Promise(async (resolve, reject) => {
+
+      const urlFromFile = await Parser.parse(xmlSitemap);
+      const totalLinks = urlFromFile.urlset.url.length;
+      if (countCheck > totalLinks) countCheck = totalLinks;
+      for (let i = 0; i < countCheck; i++) {
+        urls.push(urlFromFile.urlset.url[Math.floor(Math.random() * urlFromFile.urlset.url.length)].loc);
+        if (urls.length == countCheck) {
+          resolve({ urls, totalLinks, countCheck });
+        }
+      }
+    });
+  } catch (e) {
+    console.log(
+      dedent`
+            ${chalk.bgRed(' ОШИБКА ')}
+            CollectRandomUrls не удалось прочитать xml, 
+            ${e.message}
+            `
+    );
+  }
+};
+
+export { XmlReader, CollectRandomUrls, CollectRandomUrlsFromWebXML };
