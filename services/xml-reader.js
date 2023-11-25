@@ -2,7 +2,6 @@ import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
-import { getPath } from '../helpers/path.js';
 import chalk from 'chalk';
 import dedent from 'dedent-js';
 const Parser = new XMLParser();
@@ -49,7 +48,6 @@ const CollectRandomUrls = async (fileName, countCheck) => {
           }
         }
       });
-
     });
   } catch (e) {
     console.log(
@@ -67,7 +65,6 @@ const CollectRandomUrlsFromWebXML = async (xmlSitemap, countCheck) => {
     
     let urls = [];
     return new Promise(async (resolve, reject) => {
-
       const urlFromFile = await Parser.parse(xmlSitemap);
       const totalLinks = urlFromFile.urlset.url.length;
       if (countCheck > totalLinks) countCheck = totalLinks;

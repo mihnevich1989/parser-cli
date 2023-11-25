@@ -9,7 +9,6 @@ import { join } from 'path';
 import dedent from 'dedent-js';
 import chalk from 'chalk';
 import { ReportGenerator } from './report-generator.js';
-import { log } from 'console';
 
 
 const GetSitemap = async (url) => {
@@ -18,7 +17,7 @@ const GetSitemap = async (url) => {
     const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url); // удалить после того как сгенерируем сайтмапы Top Trending searches на проде */
 
     return new Promise(async (resolve, reject) => {
-      const response = await axios.get(url); // заменить на url
+      const response = await axios.get(url);
       // const response = await axios.get(replacedUrl);
       if (response?.data.includes('Incapsula')) {
         reject(new Error(dedent`
