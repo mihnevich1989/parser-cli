@@ -10,7 +10,7 @@ const XmlReader = async (data) => {
   try {
     const parseToJson = await Parser.parse(data);
     let url;
-    if (parseToJson?.sitemapindex?.sitemap?.length) {
+    if (parseToJson?.sitemapindex?.sitemap.length) {
       url = parseToJson.sitemapindex.sitemap[Math.floor(Math.random() * parseToJson.sitemapindex.sitemap.length)].loc;
       return url;
     } else {
@@ -27,24 +27,17 @@ const XmlReader = async (data) => {
   }
 };
 
-const CollectRandomUrls = async (fileName, countCheck) => {
+const CollectRandomUrlsFromFile = async (fileName, countCheck) => {
   try {
-    let urls = [];
     return new Promise((resolve, reject) => {
       fs.readFile(join(homedir(), fileName), 'utf8', async (err, data) => {
         if (err) {
           reject("\x1b[31mФайл не найден!\x1b[0m -", err.message);
         }
         if (data) {
-          const urlFromFile = await Parser.parse(data);
-          const totalLinks = urlFromFile.urlset.url.length;
-          if (countCheck > totalLinks) countCheck = totalLinks;
-          for (let i = 0; i < countCheck; i++) {
-            urls.push(urlFromFile.urlset.url[Math.floor(Math.random() * urlFromFile.urlset.url.length)].loc);
-            if (urls.length == countCheck) {
-              fs.unlinkSync(join(homedir(), fileName));
-              resolve({ urls, totalLinks, countCheck });
-            }
+          const result = await parseXmlData(data, true, countCheck, fileName);
+          if (result) {
+            resolve(result);
           }
         }
       });
@@ -62,17 +55,10 @@ const CollectRandomUrls = async (fileName, countCheck) => {
 
 const CollectRandomUrlsFromWebXML = async (xmlSitemap, countCheck) => {
   try {
-    
-    let urls = [];
     return new Promise(async (resolve, reject) => {
-      const urlFromFile = await Parser.parse(xmlSitemap);
-      const totalLinks = urlFromFile.urlset.url.length;
-      if (countCheck > totalLinks) countCheck = totalLinks;
-      for (let i = 0; i < countCheck; i++) {
-        urls.push(urlFromFile.urlset.url[Math.floor(Math.random() * urlFromFile.urlset.url.length)].loc);
-        if (urls.length == countCheck) {
-          resolve({ urls, totalLinks, countCheck });
-        }
+      const result = await parseXmlData(xmlSitemap, false, countCheck);
+      if (result) {
+        resolve(result);
       }
     });
   } catch (e) {
@@ -86,4 +72,18 @@ const CollectRandomUrlsFromWebXML = async (xmlSitemap, countCheck) => {
   }
 };
 
-export { XmlReader, CollectRandomUrls, CollectRandomUrlsFromWebXML };
+async function parseXmlData(data, file = true, countCheck, ...fileName) {
+  let urls = [];
+  const urlFromFile = await Parser.parse(data);
+  const totalLinks = urlFromFile.urlset.url.length;
+  if (countCheck > totalLinks) countCheck = totalLinks;
+  for (let i = 0; i < countCheck; i++) {
+    urls.push(urlFromFile.urlset.url[Math.floor(Math.random() * urlFromFile.urlset.url.length)].loc);
+    if (urls.length == countCheck) {
+      if (file) fs.unlinkSync(join(homedir(), fileName[0]));
+      return { urls, totalLinks, countCheck };
+    }
+  }
+}
+
+export { XmlReader, CollectRandomUrlsFromFile, CollectRandomUrlsFromWebXML };

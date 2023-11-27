@@ -1,27 +1,27 @@
 import axios from 'axios';
 import https from 'https';
-import { getPath } from '../helpers/path.js';
-import * as stream from 'stream';
-import { promisify } from 'util';
 import fs from 'fs';
-import { homedir } from 'os';
-import { join } from 'path';
+import * as stream from 'stream';
 import dedent from 'dedent-js';
 import chalk from 'chalk';
+import { promisify } from 'util';
+import { homedir } from 'os';
+import { join } from 'path';
+import { getPath } from '../helpers/path.js';
 import { ReportGenerator } from './report-generator.js';
 
 
 const GetSitemap = async (url) => {
   try {
-    /* const server = 'https://test.nuwber.com/' // удалить после того как сгенерируем сайтмапы Top Trending searches на проде
-    const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url); // удалить после того как сгенерируем сайтмапы Top Trending searches на проде */
-
     return new Promise(async (resolve, reject) => {
       const response = await axios.get(url);
-      // const response = await axios.get(replacedUrl);
-      if (response?.data.includes('Incapsula')) {
+      if (response.data.includes('Incapsula')) {
         reject(new Error(dedent`
         Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(403)}`));
+      }
+      if (response.status == 404) {
+        reject(new Error(dedent`
+      Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(response.status)}`));
       }
       if (url.includes('.xml.gz')) {
         resolve();
@@ -40,12 +40,18 @@ const GetSitemap = async (url) => {
 
 const DownloadArchive = async (fileUrl) => {
   try {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const pipeline = promisify(stream.pipeline);
       const fileName = fileUrl.slice(fileUrl.lastIndexOf('/') + 1);
       axios.get(fileUrl, { responseType: 'stream' })
         .then(response => {
           pipeline(response.data, fs.createWriteStream(join(homedir(), fileName)).on('finish', () => { resolve(fileName); }));
+        }).catch(function (error, response) {
+          if (error) {
+            reject(new Error(dedent`
+          Ошибка скачивания файла: ${fileUrl} 
+          ${chalk.yellow('Error:')} ${chalk.red(error.message)}`));
+          }
         });
     });
   } catch (e) {
@@ -61,7 +67,6 @@ const DownloadArchive = async (fileUrl) => {
 const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fileSize, countCheck, startTime) => {
   try {
     let fails = 0;
-
     urls.forEach((url, i) => {
       const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
       setTimeout(async function () {

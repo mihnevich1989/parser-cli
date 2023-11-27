@@ -1,6 +1,6 @@
 import dedent from 'dedent-js';
 import { GetSitemap, DownloadArchive, GetStatusCodeAndReport } from './services/web-worker.js';
-import { XmlReader, CollectRandomUrls, CollectRandomUrlsFromWebXML } from './services/xml-reader.js';
+import { XmlReader, CollectRandomUrlsFromFile, CollectRandomUrlsFromWebXML } from './services/xml-reader.js';
 import chalk from 'chalk';
 import { GetInfoAboutFile, UnzipFile } from './services/file-worker.js';
 import { performance } from 'perf_hooks';
@@ -23,14 +23,14 @@ const parserCLI = async () => {
 
     if (!SITEMAP.includes('.xml.gz')) {
 
-      console.log('here 0');
+      console.log('Debug step 0');
 
       parser = await XmlReader(sitemap);
     }
 
     if (!!parser && !parser.includes('.xml.gz') && parser.includes('.xml')) {
 
-      console.log('here 1');
+      console.log('Debug step 1');
 
       const nextLevelSitemap = await GetSitemap(parser);
       collectRandomUrls = await CollectRandomUrlsFromWebXML(nextLevelSitemap, COUNT);
@@ -38,19 +38,19 @@ const parserCLI = async () => {
 
     } else if (!!parser && !parser.includes('.xml.gz') && !parser.includes('.xml')) {
 
-      console.log('here 2');
+      console.log('Debug step 2');
 
       collectRandomUrls = await CollectRandomUrlsFromWebXML(parser, COUNT);
       await GetStatusCodeAndReport(collectRandomUrls.urls, SERVER, SITEMAP, collectRandomUrls.totalLinks, null, collectRandomUrls.countCheck, time);
 
     } else {
 
-      console.log('here 3');
+      console.log('Debug step 3');
 
       const archive = await DownloadArchive(parser ?? SITEMAP);
       const unzipedFile = await UnzipFile(archive);
       fileSize = await GetInfoAboutFile(unzipedFile);
-      collectRandomUrls = await CollectRandomUrls(unzipedFile, COUNT);
+      collectRandomUrls = await CollectRandomUrlsFromFile(unzipedFile, COUNT);
       await GetStatusCodeAndReport(collectRandomUrls.urls, SERVER, unzipedFile, collectRandomUrls.totalLinks, fileSize, collectRandomUrls.countCheck, time);
     }
 
