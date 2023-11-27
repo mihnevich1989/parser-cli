@@ -4,6 +4,7 @@ import { XmlReader, CollectRandomUrlsFromFile, CollectRandomUrlsFromWebXML } fro
 import chalk from 'chalk';
 import { GetInfoAboutFile, UnzipFile } from './services/file-worker.js';
 import { performance } from 'perf_hooks';
+import { debug } from 'console';
 
 
 const SERVER = process.argv[2];
@@ -23,14 +24,14 @@ const parserCLI = async () => {
 
     if (!SITEMAP.includes('.xml.gz')) {
 
-      console.log('Debug step 0');
+      debug('Debug step 0');
 
       parser = await XmlReader(sitemap);
     }
 
     if (!!parser && !parser.includes('.xml.gz') && parser.includes('.xml')) {
 
-      console.log('Debug step 1');
+      debug('Debug step 1');
 
       const nextLevelSitemap = await GetSitemap(parser);
       collectRandomUrls = await CollectRandomUrlsFromWebXML(nextLevelSitemap, COUNT);
@@ -38,14 +39,14 @@ const parserCLI = async () => {
 
     } else if (!!parser && !parser.includes('.xml.gz') && !parser.includes('.xml')) {
 
-      console.log('Debug step 2');
+      debug('Debug step 2');
 
       collectRandomUrls = await CollectRandomUrlsFromWebXML(parser, COUNT);
       await GetStatusCodeAndReport(collectRandomUrls.urls, SERVER, SITEMAP, collectRandomUrls.totalLinks, null, collectRandomUrls.countCheck, time);
 
     } else {
 
-      console.log('Debug step 3');
+      debug('Debug step 3');
 
       const archive = await DownloadArchive(parser ?? SITEMAP);
       const unzipedFile = await UnzipFile(archive);
