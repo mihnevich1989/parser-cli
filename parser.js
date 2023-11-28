@@ -24,14 +24,14 @@ const parserCLI = async () => {
 
     if (!SITEMAP.includes('.xml.gz')) {
 
-      debug('Debug step 0');
+      //debug('Debug step 0');
 
       parser = await XmlReader(sitemap);
     }
 
     if (!!parser && !parser.includes('.xml.gz') && parser.includes('.xml')) {
 
-      debug('Debug step 1');
+      //debug('Debug step 1');
 
       const nextLevelSitemap = await GetSitemap(parser);
       collectRandomUrls = await CollectRandomUrlsFromWebXML(nextLevelSitemap, COUNT);
@@ -39,14 +39,14 @@ const parserCLI = async () => {
 
     } else if (!!parser && !parser.includes('.xml.gz') && !parser.includes('.xml')) {
 
-      debug('Debug step 2');
+      //debug('Debug step 2');
 
       collectRandomUrls = await CollectRandomUrlsFromWebXML(parser, COUNT);
       await GetStatusCodeAndReport(collectRandomUrls.urls, SERVER, SITEMAP, collectRandomUrls.totalLinks, null, collectRandomUrls.countCheck, time);
 
     } else {
 
-      debug('Debug step 3');
+      //debug('Debug step 3');
 
       const archive = await DownloadArchive(parser ?? SITEMAP);
       const unzipedFile = await UnzipFile(archive);
