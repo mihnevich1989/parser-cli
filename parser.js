@@ -4,12 +4,13 @@ import { XmlReader, CollectRandomUrlsFromFile, CollectRandomUrlsFromWebXML } fro
 import chalk from 'chalk';
 import { GetInfoAboutFile, UnzipFile } from './services/file-worker.js';
 import { performance } from 'perf_hooks';
-import { debug } from 'console';
+import { debug, log } from 'console';
 
 
 const SERVER = process.argv[2];
 const SITEMAP = process.argv[3];
 const COUNT = process.argv[4] || 300;
+const SUBDOMAIN = process.argv[5] || null;
 
 const parserCLI = async () => {
   try {
@@ -24,14 +25,14 @@ const parserCLI = async () => {
 
     if (!SITEMAP.includes('.xml.gz')) {
 
-      //debug('Debug step 0');
+      // debug('Debug step 0');
 
-      parser = await XmlReader(sitemap);
+      parser = await XmlReader(sitemap, SUBDOMAIN);
     }
 
     if (!!parser && !parser.includes('.xml.gz') && parser.includes('.xml')) {
 
-      //debug('Debug step 1');
+      // debug('Debug step 1');
 
       const nextLevelSitemap = await GetSitemap(parser);
       collectRandomUrls = await CollectRandomUrlsFromWebXML(nextLevelSitemap, COUNT);
@@ -39,14 +40,14 @@ const parserCLI = async () => {
 
     } else if (!!parser && !parser.includes('.xml.gz') && !parser.includes('.xml')) {
 
-      //debug('Debug step 2');
+      // debug('Debug step 2');
 
       collectRandomUrls = await CollectRandomUrlsFromWebXML(parser, COUNT);
       await GetStatusCodeAndReport(collectRandomUrls.urls, SERVER, SITEMAP, collectRandomUrls.totalLinks, null, collectRandomUrls.countCheck, time);
 
     } else {
 
-      //debug('Debug step 3');
+      // debug('Debug step 3');
 
       const archive = await DownloadArchive(parser ?? SITEMAP);
       const unzipedFile = await UnzipFile(archive);

@@ -2,17 +2,22 @@ import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
+import { getPath } from '../helpers/path.js';
 import chalk from 'chalk';
 import dedent from 'dedent-js';
 const Parser = new XMLParser();
 
-const XmlReader = async (data) => {
+const XmlReader = async (data, subdomain) => {
   try {
     const parseToJson = await Parser.parse(data);
     let url;
     if (parseToJson?.sitemapindex?.sitemap.length) {
       url = parseToJson.sitemapindex.sitemap[Math.floor(Math.random() * parseToJson.sitemapindex.sitemap.length)].loc;
-      return url;
+      if (subdomain != null) {
+        return `${subdomain}${getPath(url)}`;
+      } else {
+        return url;
+      }
     } else {
       return data;
     }
