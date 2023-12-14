@@ -11,22 +11,30 @@ import { getPath } from '../helpers/path.js';
 import { ReportGenerator } from './report-generator.js';
 
 
-const GetSitemap = async (url) => {
+const GetSitemap = (url) => {
   try {
     return new Promise(async (resolve, reject) => {
-      const response = await axios.get(url);
-      if (response.data.includes('Incapsula')) {
-        reject(new Error(dedent`
-        Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(403)}`));
-      }
-      if (response.status == 404) {
-        reject(new Error(dedent`
-      Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(response.status)}`));
-      }
-      if (url.includes('.xml.gz')) {
-        resolve();
-      }
-      resolve(response.data);
+      axios.get(url).then(response => {
+        if (response.data.includes('Incapsula')) {
+          reject(new Error(dedent`
+          Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(403)}`));
+        }
+        if (response.status == 404 || response.status == 403) {
+          reject(new Error(dedent`
+        Ошибка получения доступа: ${url}: ${chalk.yellow('Status Code')} ${chalk.red(response.status)}`));
+        }
+        if (url.includes('.xml.gz')) {
+          resolve();
+        }
+        resolve(response.data);
+      }).catch(err => {
+        console.log(
+          dedent`
+                ${chalk.bgRed(' ОШИБКА ')} получения доступа к sitemap 
+                ${err.message}
+                `
+        );
+      });
     });
   } catch (e) {
     console.log(
@@ -71,7 +79,8 @@ const GetStatusCodeAndReport = async (urls, server, unzipedFile, totalLinks, fil
       const replacedUrl = (server.includes('leadar') ? `${server.slice(0, 8)}${username}:${password}@${server.slice(8)}` : `${server}`) + getPath(url);
       setTimeout(async function () {
         https.request(`${replacedUrl}`, (res) => {
-          if (res.statusCode !== 200) {й
+          if (res.statusCode !== 200) {
+            й;
             fails++;
             console.log(`${replacedUrl} - ${chalk.yellow('Status Code:')} ${chalk.bgRed(res.statusCode)}`);
           } else {
